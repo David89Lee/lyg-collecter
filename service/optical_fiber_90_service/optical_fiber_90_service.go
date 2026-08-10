@@ -136,8 +136,8 @@ func (t *OpticalFiber90Service) FindInsulationMonitorDataByOpticalFiber90(optica
 		insulationMonitorData.Temperatures3 = append(insulationMonitorData.Temperatures3, &offsetVal)
 		insulationMonitorData.Anomalies3 = append(insulationMonitorData.Anomalies3, offsetVal-*opticalFiber90.EnvTemperature > common.GeneralSetting.AbnormalTemperatureDifference)
 		insulationMonitorData.HeatLosses3 = append(insulationMonitorData.HeatLosses3, common.CalHeatLoss(1.0, &offsetVal, opticalFiber90.EnvTemperature, opticalFiber90.WindSpeed))
-		insulationMonitorData.AbnormalTemperature = *opticalFiber90.EnvTemperature + common.GeneralSetting.AbnormalTemperatureDifference
 	}
+	insulationMonitorData.AbnormalTemperature = *opticalFiber90.EnvTemperature + common.GeneralSetting.AbnormalTemperatureDifference
 	return insulationMonitorData, nil
 }
 
