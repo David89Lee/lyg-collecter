@@ -1,0 +1,145 @@
+definitions:
+  optical_fiber_90_service.HeatLossData:
+    properties:
+      heatLoss:
+        format: float64
+        type: number
+      pipeSection:
+        type: string
+      standard:
+        format: float32
+        type: number
+    type: object
+  optical_fiber_90_service.InsulationMonitorData:
+    properties:
+      anomalies:
+        items:
+          type: boolean
+        type: array
+      heatLosses:
+        items:
+          format: float32
+          type: number
+        type: array
+      monitorPoints:
+        items:
+          type: string
+        type: array
+      temperatures:
+        items:
+          format: float32
+          type: number
+        type: array
+    type: object
+  optical_fiber_90_service.InsulationPerformanceData:
+    properties:
+      actualLoss:
+        items:
+          format: float64
+          type: number
+        type: array
+      dates:
+        items:
+          type: integer
+        type: array
+      predictLoss:
+        items:
+          format: float64
+          type: number
+        type: array
+      predictedLifespan:
+        format: float64
+        type: number
+      standardLoss:
+        items:
+          format: float32
+          type: number
+        type: array
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact:
+    name: LYG
+  description: 连云港二期
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: 连云港二期
+  version: "1.0"
+paths:
+  /api/v1/heat-loss-data:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.HeatLossData'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取管道散热损失分析
+      tags:
+      - 光纤测温
+  /api/v1/insulation-monitor-data:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.InsulationMonitorData'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取绝热异常及定位数据
+      tags:
+      - 光纤测温
+  /api/v1/insulation-performance-data:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.InsulationPerformanceData'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取绝热性能监控及预测
+      tags:
+      - 光纤测温
+swagger: "2.0"

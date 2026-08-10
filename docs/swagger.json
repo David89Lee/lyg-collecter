@@ -1,0 +1,232 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "连云港二期",
+        "title": "连云港二期",
+        "contact": {
+            "name": "LYG"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "127.0.0.1:8080",
+    "paths": {
+        "/api/v1/heat-loss-data": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "获取管道散热损失分析",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.HeatLossData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/insulation-monitor-data": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "获取绝热异常及定位数据",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.InsulationMonitorData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/insulation-performance-data": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "获取绝热性能监控及预测",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.InsulationPerformanceData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "optical_fiber_90_service.HeatLossData": {
+            "type": "object",
+            "properties": {
+                "heatLoss": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "pipeSection": {
+                    "type": "string"
+                },
+                "standard": {
+                    "type": "number",
+                    "format": "float32"
+                }
+            }
+        },
+        "optical_fiber_90_service.InsulationMonitorData": {
+            "type": "object",
+            "properties": {
+                "anomalies": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "heatLosses": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "monitorPoints": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "temperatures": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                }
+            }
+        },
+        "optical_fiber_90_service.InsulationPerformanceData": {
+            "type": "object",
+            "properties": {
+                "actualLoss": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float64"
+                    }
+                },
+                "dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "predictLoss": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float64"
+                    }
+                },
+                "predictedLifespan": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "standardLoss": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "msg": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
