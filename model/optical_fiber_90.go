@@ -129,7 +129,7 @@ func GetLastOpticalFiber90AvgAndEnvTemperature() (avg, env, windSpeed *float32, 
 	}
 	var result Result
 	// code2作环境温度
-	err = DB.Table("optical_fiber90").Select(fmt.Sprintf("%s/%s", selectCodeSumSql(), selectSSumSql())+" as avg", "code2 as env_temperature", "wind_speed").Order("id desc").Limit(1).Scan(&result).Error
+	err = DB.Table("optical_fiber90").Select(fmt.Sprintf("%s/%s", selectCodeSumSql(), selectSSumSql())+" as avg", "case when env_temperature > code2 then env_temperature else code2 end as env_temperature", "wind_speed").Order("id desc").Limit(1).Scan(&result).Error
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -147,7 +147,7 @@ func FindOpticalFiber90YearAvg() ([]*YearAvgDataResult, error) {
 	var yearAvgDataResult []*YearAvgDataResult
 	err := DB.Table("optical_fiber90").
 		// code2作环境温度
-		Select("year", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(code2) as env_temperature", "AVG(wind_speed) as wind_speed").
+		Select("year", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(case when env_temperature > code2 then env_temperature else code2 end) as env_temperature", "AVG(wind_speed) as wind_speed").
 		Where("code2 is not null"). //code2是null大概率别的点位都是null，现场断电的状态，排除计算，不然会按0进行计算，虽然整月都没数据的概率很小，但保险起见还是加上
 		Group("year").
 		Scan(&yearAvgDataResult).Error
@@ -159,7 +159,7 @@ func FindOpticalFiber90AvgByYearMonths(year int, months []int) (*YearAvgDataResu
 	var yearAvgData YearAvgDataResult
 	err := DB.Table("optical_fiber90").
 		// code2作环境温度
-		Select(fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(code2) as env_temperature", "AVG(wind_speed) as wind_speed").
+		Select(fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(case when env_temperature > code2 then env_temperature else code2 end) as env_temperature", "AVG(wind_speed) as wind_speed").
 		Where("code2 is not null and year = ? and month in ?", year, months). //code2是null大概率别的点位都是null，现场断电的状态，排除计算，不然会按0进行计算，虽然整月都没数据的概率很小，但保险起见还是加上
 		Take(&yearAvgData).Error
 	if err != nil {
@@ -187,7 +187,7 @@ func FindOpticalFiber90MonthAvg(monthNum int) ([]*MonthAvgDataResult, error) {
 	var avgDataResult []*MonthAvgDataResult
 	err := DB.Table("optical_fiber90").
 		// code2作环境温度
-		Select("year", "month", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(code2) as env_temperature", "AVG(wind_speed) as wind_speed").
+		Select("year", "month", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(case when env_temperature > code2 then env_temperature else code2 end) as env_temperature", "AVG(wind_speed) as wind_speed").
 		Where(strings.Join(dateSqlArray, " or ")).
 		Where("code2 is not null"). //code2是null大概率别的点位都是null，现场断电的状态，排除计算，不然会按0进行计算，虽然整月都没数据的概率很小，但保险起见还是加上
 		Group("year, month").
@@ -215,7 +215,7 @@ func FindOpticalFiber90HourAvg(monthNum int) ([]*HourAvgDataResult, error) {
 	var hourAvgDataResult []*HourAvgDataResult
 	err := DB.Table("optical_fiber90").
 		// code2作环境温度
-		Select("year", "month", "day", "hour", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(code2) as env_temperature", "AVG(wind_speed) as wind_speed").
+		Select("year", "month", "day", "hour", fmt.Sprintf("AVG(%s/%s) as temperature", selectCodeSumSql(), selectSSumSql()), "AVG(case when env_temperature > code2 then env_temperature else code2 end) as env_temperature", "AVG(wind_speed) as wind_speed").
 		Where(strings.Join(dateSqlArray, " or ")).
 		Where("code2 is not null"). // code2是null大概率别的点位都是null，现场断电的状态，排除计算，不然会按0进行计算
 		Group("year, month, day, hour").
@@ -246,7 +246,7 @@ func GetOpticalFiber90IDByYearMonthDayHour(year, month, day, hour string) (id ui
 func FindOpticalFiber90ThreePointsDataOpen(c1, c2, c3, s1, s2, s3, year1, month1, day1, hour1 string) ([]*ThreePointsData, error) {
 	var threePointsData []*ThreePointsData
 	err := DB.Table("optical_fiber90").
-		Select("year", "month", "day", "hour", "wind_speed", "code2 as env_temperature",
+		Select("year", "month", "day", "hour", "wind_speed", "case when env_temperature > code2 then env_temperature else code2 end as env_temperature",
 			fmt.Sprintf("case when %s=1 then %s else null end as c1", s1, c1),
 			fmt.Sprintf("case when %s=1 then %s else null end as c2", s2, c2),
 			fmt.Sprintf("case when %s=1 then %s else null end as c3", s3, c3),
@@ -260,7 +260,7 @@ func FindOpticalFiber90ThreePointsDataOpen(c1, c2, c3, s1, s2, s3, year1, month1
 func FindOpticalFiber90ThreePointsDataClosed(c1, c2, c3, s1, s2, s3, year1, month1, day1, hour1 string, id2 uint) ([]*ThreePointsData, error) {
 	var threePointsData []*ThreePointsData
 	err := DB.Table("optical_fiber90").
-		Select("year", "month", "day", "hour", "wind_speed", "code2 as env_temperature",
+		Select("year", "month", "day", "hour", "wind_speed", "case when env_temperature > code2 then env_temperature else code2 end as env_temperature",
 			fmt.Sprintf("case when %s=1 then %s else null end as c1", s1, c1),
 			fmt.Sprintf("case when %s=1 then %s else null end as c2", s2, c2),
 			fmt.Sprintf("case when %s=1 then %s else null end as c3", s3, c3),

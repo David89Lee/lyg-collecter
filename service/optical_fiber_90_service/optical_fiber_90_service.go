@@ -58,7 +58,12 @@ func (t *OpticalFiber90Service) FindInsulationMonitorDataByOpticalFiber90(optica
 	//	return nil, err
 	//}
 	// 目前用裸露出的光纤点作为环境温度
-	opticalFiber90.EnvTemperature = opticalFiber90.Code2
+	//opticalFiber90.EnvTemperature = opticalFiber90.Code2
+
+	// opticalFiber90.EnvTemperature和opticalFiber90.Code2取大的，大的更接近测点温度，热损更低
+	if *opticalFiber90.EnvTemperature < *opticalFiber90.Code2 {
+		opticalFiber90.EnvTemperature = opticalFiber90.Code2
+	}
 
 	// 初始化 insulationMonitorData
 	insulationMonitorData := &InsulationMonitorData{}
@@ -399,8 +404,15 @@ func (t *OpticalFiber90Service) GetLastWeather() (*WeatherData, error) {
 		return nil, err
 	}
 
+	var temperature float32
+	if *opticalFiber90.EnvTemperature > *opticalFiber90.Code2 {
+		temperature = *opticalFiber90.EnvTemperature
+	} else {
+		temperature = *opticalFiber90.Code2
+	}
+
 	return &WeatherData{
-		Temperature: *opticalFiber90.Code2,
+		Temperature: temperature,
 		WindSpeed:   *opticalFiber90.WindSpeed,
 		Humidity:    *opticalFiber90.Humidity,
 	}, nil

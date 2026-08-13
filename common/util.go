@@ -3,16 +3,21 @@ package common
 import (
 	"errors"
 	"math"
+
+	"go.uber.org/zap"
 )
 
 const (
 	// 材料表面辐射系数，单位为瓦每平方米4次方开
 	Dr = 0.85 * (5.67 * 0.00000001)
 	// 保温外径，单位mm
-	De = 1150
+	De = 1.15
 )
 
 func CalHeatLoss(temperatureCoefficient float32, temperature, envTemperature, windSpeed *float32) *float64 {
+	// 打印temperature、envTemperature
+	zap.L().Info("temperature", zap.Float32("temperature", *temperature))
+	zap.L().Info("envTemperature", zap.Float32("envTemperature", *envTemperature))
 	alpha := CalAlpha(temperatureCoefficient, temperature, envTemperature, windSpeed)
 	if alpha == nil {
 		return nil
@@ -55,6 +60,9 @@ func CalAlpha(temperatureCoefficient float32, temperature, envTemperature, windS
 	var alphaR = ar * Dr
 
 	alpha := alphaR + alphaC
+
+	zap.L().Info("alphaR", zap.Float64("alphaR", alphaR))
+	zap.L().Info("alphaC", zap.Float64("alphaC", alphaC))
 
 	return &alpha
 }
