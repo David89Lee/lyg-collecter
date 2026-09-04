@@ -34,6 +34,8 @@ type InsulationMonitorData struct {
 	DeviceExceptions2   []bool
 	DeviceExceptions3   []bool
 	AbnormalTemperature float32
+	EnvTemperature      float32
+	WindSpeed           float32
 }
 
 func (t *OpticalFiber90Service) FindInsulationMonitorData() (*InsulationMonitorData, error) {
@@ -143,6 +145,8 @@ func (t *OpticalFiber90Service) FindInsulationMonitorDataByOpticalFiber90(optica
 		insulationMonitorData.HeatLosses3 = append(insulationMonitorData.HeatLosses3, common.CalHeatLoss(1.0, &offsetVal, opticalFiber90.EnvTemperature, opticalFiber90.WindSpeed))
 	}
 	insulationMonitorData.AbnormalTemperature = *opticalFiber90.EnvTemperature + common.GeneralSetting.AbnormalTemperatureDifference
+	insulationMonitorData.EnvTemperature = *opticalFiber90.EnvTemperature
+	insulationMonitorData.WindSpeed = *opticalFiber90.WindSpeed
 	return insulationMonitorData, nil
 }
 
