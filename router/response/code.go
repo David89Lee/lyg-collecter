@@ -17,6 +17,7 @@ const (
 	ErrorGetWeatherData                              = 10003
 	ErrorFindInsulationMonitorDataByYearMonthDayHour = 10004
 	ErrorFindOpticalFiber90ThreePointsData           = 10005
+	ErrorExportOpticalFiber90ThreePointsDataExcel    = 10006
 
 	ErrorFindTile = 10010
 )

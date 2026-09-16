@@ -17,6 +17,7 @@ var MsgFlags = map[int]string{
 	ErrorGetWeatherData:                              "获取天气数据失败",
 	ErrorFindInsulationMonitorDataByYearMonthDayHour: "获取绝热异常及定位历史数据失败",
 	ErrorFindOpticalFiber90ThreePointsData:           "获取截面三点历史数据失败",
+	ErrorExportOpticalFiber90ThreePointsDataExcel:    "导出截面三点历史数据失败",
 
 	ErrorFindTile: "获取瓦片数据失败",
 }

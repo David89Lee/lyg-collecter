@@ -56,3 +56,5 @@ config.local.yml
 *.db
 *.sqlite
 *.sqlite3
+
+lyg-collecter

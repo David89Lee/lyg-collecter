@@ -39,6 +39,7 @@ func InitRouter() *gin.Engine {
 	apiv1.GET("/insulation-performance-data", v1.FindInsulationPerformanceData)
 	apiv1.GET("/weather", v1.GetLastWeather)
 	apiv1.GET("/three-points-data", v1.FindOpticalFiber90ThreePointsData)
+	apiv1.GET("/three-points-data/export", v1.ExportOpticalFiber90ThreePointsDataExcel)
 
 	apiv1.GET("/tile/:z/:x/:y", v1.FindTile)
 

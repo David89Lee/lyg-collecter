@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"fmt"
 	"lyg-collecter/router/response"
 	"lyg-collecter/service/optical_fiber_90_service"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -147,4 +149,41 @@ func FindOpticalFiber90ThreePointsData(c *gin.Context) {
 		return
 	}
 	resG.Response(http.StatusOK, response.SUCCESS, data)
+}
+
+// @Summary 导出界面上三个点历史曲线数据为 Excel
+// @Tags 光纤测温
+// @Produce octet-stream
+// @Success 200 {file} binary "xlsx 文件"
+// @Failure 400 {object} response.Response "参数错误"
+// @Failure 500 {object} response.Response
+// @Router /api/v1/three-points-data/export [get]
+func ExportOpticalFiber90ThreePointsDataExcel(c *gin.Context) {
+	resG := response.Gin{C: c}
+	iStr := c.Query("i")
+	year1Str := c.Query("year1")
+	month1Str := c.Query("month1")
+	day1Str := c.Query("day1")
+	hour1Str := c.Query("hour1")
+	year2Str := c.Query("year2")
+	month2Str := c.Query("month2")
+	day2Str := c.Query("day2")
+	hour2Str := c.Query("hour2")
+	i, err := strconv.Atoi(iStr)
+	if err != nil {
+		zap.L().Error("参数i转换int失败", zap.Error(err))
+		resG.Response(http.StatusOK, response.InvalidParams, nil)
+		return
+	}
+	service := optical_fiber_90_service.OpticalFiber90Service{}
+	data, filename, err := service.ExportOpticalFiber90ThreePointsDataExcel(i, year1Str, month1Str, day1Str, hour1Str, year2Str, month2Str, day2Str, hour2Str)
+	if err != nil {
+		zap.L().Error("导出界面上三个点历史曲线数据失败", zap.Error(err))
+		resG.Response(http.StatusOK, response.ErrorExportOpticalFiber90ThreePointsDataExcel, nil)
+		return
+	}
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename*=UTF-8''%s", url.QueryEscape(filename)))
+	c.Data(http.StatusOK, contentType, data)
 }
