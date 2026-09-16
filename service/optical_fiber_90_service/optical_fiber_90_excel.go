@@ -25,7 +25,7 @@ func (t *OpticalFiber90Service) ExportOpticalFiber90ThreePointsDataExcel(i int, 
 		return nil, "", fmt.Errorf("截面三点历史数据为空")
 	}
 
-	data, err := buildThreePointsExcel(list)
+	data, err := buildThreePointsExcel(list, i)
 	if err != nil {
 		return nil, "", err
 	}
@@ -35,8 +35,9 @@ func (t *OpticalFiber90Service) ExportOpticalFiber90ThreePointsDataExcel(i int, 
 	return data, filename, nil
 }
 
-// buildThreePointsExcel 根据三点历史数据生成 xlsx 文件二进制内容
-func buildThreePointsExcel(list *ThreePointsDataList) ([]byte, error) {
+// buildThreePointsExcel 根据三点历史数据生成 xlsx 文件二进制内容。
+// 第一行合并整行写入位置与管墩号，第二行为表头，数据从第三行开始。
+func buildThreePointsExcel(list *ThreePointsDataList, i int) ([]byte, error) {
 	f := excelize.NewFile()
 	defer f.Close()
 
@@ -61,22 +62,49 @@ func buildThreePointsExcel(list *ThreePointsDataList) ([]byte, error) {
 		return nil, err
 	}
 	// 数据单元格：保留一位小数
-	normalStyle, err := f.NewStyle(&excelize.Style{NumFmt: 2})
+	oneDecimal := "0.0"
+	normalStyle, err := f.NewStyle(&excelize.Style{CustomNumFmt: &oneDecimal})
 	if err != nil {
 		return nil, err
 	}
 	// 超过本行异常温度：红色加粗
 	redStyle, err := f.NewStyle(&excelize.Style{
-		NumFmt: 2,
-		Font:   &excelize.Font{Color: "FF0000", Bold: true},
+		CustomNumFmt: &oneDecimal,
+		Font:         &excelize.Font{Color: "FF0000", Bold: true},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// 写表头
+	// 位置i/102和管墩号写入第一行，管墩号用FindPipeSection(i)查询
+	titleStyle, err := f.NewStyle(&excelize.Style{
+		Font:      &excelize.Font{Bold: true, Size: 12},
+		Alignment: &excelize.Alignment{Vertical: "center"},
+	})
+	if err != nil {
+		return nil, err
+	}
+	// 合并第一行的 len(threePointsHeaders) 个单元格
+	titleEnd, err := excelize.CoordinatesToCellName(len(threePointsHeaders), 1)
+	if err != nil {
+		return nil, err
+	}
+	if err = f.MergeCell(sheet, "A1", titleEnd); err != nil {
+		return nil, err
+	}
+	if err = f.SetCellValue(sheet, "A1", fmt.Sprintf("位置:%d/102  %s", i, FindPipeSection(float32(i)))); err != nil {
+		return nil, err
+	}
+	if err = f.SetCellStyle(sheet, "A1", titleEnd, titleStyle); err != nil {
+		return nil, err
+	}
+	if err = f.SetRowHeight(sheet, 1, 22); err != nil {
+		return nil, err
+	}
+
+	// 写表头（第二行）
 	for col, name := range threePointsHeaders {
-		axis, err := excelize.CoordinatesToCellName(col+1, 1)
+		axis, err := excelize.CoordinatesToCellName(col+1, 2)
 		if err != nil {
 			return nil, err
 		}
@@ -94,12 +122,12 @@ func buildThreePointsExcel(list *ThreePointsDataList) ([]byte, error) {
 	if err = f.SetColWidth(sheet, "B", "G", 16); err != nil {
 		return nil, err
 	}
-	// 冻结首行，数据量较大时方便查看
+	// 冻结标题行与表头行，数据量较大时方便查看
 	if err = f.SetPanes(sheet, &excelize.Panes{
 		Freeze:      true,
 		XSplit:      0,
-		YSplit:      1,
-		TopLeftCell: "A2",
+		YSplit:      2,
+		TopLeftCell: "A3",
 		ActivePane:  "bottomLeft",
 	}); err != nil {
 		return nil, err
@@ -107,7 +135,7 @@ func buildThreePointsExcel(list *ThreePointsDataList) ([]byte, error) {
 
 	// 写数据行：每一行按各自数组的索引对齐
 	for row := 0; row < len(list.Times); row++ {
-		r := row + 2 // 第 1 行为表头
+		r := row + 3 // 第 1 行为标题、第 2 行为表头
 		abnormal := threePointsValueAt(list.AbnormalTemperature, row)
 		c1 := threePointsValueAt(list.C1, row)
 		c2 := threePointsValueAt(list.C2, row)
