@@ -12,6 +12,14 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 
+// ExcelFile 以文本（base64）方式承载 Excel 文件内容，
+// 供第三方平台（如蓝卓 supOS）封装服务后无法直接下载二进制流时使用
+type ExcelFile struct {
+	Filename    string `json:"filename"`
+	ContentType string `json:"content_type"`
+	Body        string `json:"body"`
+}
+
 type Pagination struct {
 	Page     int `json:"page"`
 	PageSize int `json:"page_size"`

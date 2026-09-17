@@ -1,12 +1,14 @@
 package v1
 
 import (
+	"encoding/base64"
 	"fmt"
 	"lyg-collecter/router/response"
 	"lyg-collecter/service/optical_fiber_90_service"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -154,6 +156,7 @@ func FindOpticalFiber90ThreePointsData(c *gin.Context) {
 // @Summary 导出界面上三个点历史曲线数据为 Excel
 // @Tags 光纤测温
 // @Produce octet-stream
+// @Param format query string false "传 base64 时以 JSON 返回 base64 文本，供第三方平台还原下载"
 // @Success 200 {file} binary "xlsx 文件"
 // @Failure 400 {object} response.Response "参数错误"
 // @Failure 500 {object} response.Response
@@ -183,6 +186,16 @@ func ExportOpticalFiber90ThreePointsDataExcel(c *gin.Context) {
 		return
 	}
 	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	// format=base64：以 JSON + base64 文本返回，供第三方平台（如蓝卓 supOS）封装服务后
+	// 由前端还原为 Blob 下载，避免二进制流被文本化后损坏
+	if strings.EqualFold(c.Query("format"), "base64") {
+		resG.Response(http.StatusOK, response.SUCCESS, response.ExcelFile{
+			Filename:    filename,
+			ContentType: contentType,
+			Body:        base64.StdEncoding.EncodeToString(data),
+		})
+		return
+	}
 	c.Header("Content-Type", contentType)
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename*=UTF-8''%s", url.QueryEscape(filename)))
 	c.Data(http.StatusOK, contentType, data)
