@@ -9,27 +9,87 @@ definitions:
       standard:
         format: float32
         type: number
+      totalHeat:
+        format: float64
+        type: number
     type: object
   optical_fiber_90_service.InsulationMonitorData:
     properties:
-      anomalies:
+      abnormalTemperature:
+        format: float32
+        type: number
+      anomalies1:
         items:
           type: boolean
         type: array
-      heatLosses:
+      anomalies2:
         items:
-          format: float32
+          type: boolean
+        type: array
+      anomalies3:
+        items:
+          type: boolean
+        type: array
+      deviceExceptions1:
+        items:
+          type: boolean
+        type: array
+      deviceExceptions2:
+        items:
+          type: boolean
+        type: array
+      deviceExceptions3:
+        items:
+          type: boolean
+        type: array
+      envTemperature:
+        format: float32
+        type: number
+      heatLosses1:
+        items:
+          format: float64
           type: number
         type: array
-      monitorPoints:
+      heatLosses2:
+        items:
+          format: float64
+          type: number
+        type: array
+      heatLosses3:
+        items:
+          format: float64
+          type: number
+        type: array
+      monitorPoints1:
         items:
           type: string
         type: array
-      temperatures:
+      monitorPoints2:
+        items:
+          type: string
+        type: array
+      monitorPoints3:
+        items:
+          type: string
+        type: array
+      temperatures1:
         items:
           format: float32
           type: number
         type: array
+      temperatures2:
+        items:
+          format: float32
+          type: number
+        type: array
+      temperatures3:
+        items:
+          format: float32
+          type: number
+        type: array
+      windSpeed:
+        format: float32
+        type: number
     type: object
   optical_fiber_90_service.InsulationPerformanceData:
     properties:
@@ -55,6 +115,55 @@ definitions:
           format: float32
           type: number
         type: array
+    type: object
+  optical_fiber_90_service.ThreePointsDataList:
+    properties:
+      abnormalTemperature:
+        items:
+          format: float32
+          type: number
+        type: array
+      c1:
+        items:
+          format: float32
+          type: number
+        type: array
+      c2:
+        items:
+          format: float32
+          type: number
+        type: array
+      c3:
+        items:
+          format: float32
+          type: number
+        type: array
+      envTemperature:
+        items:
+          format: float32
+          type: number
+        type: array
+      times:
+        items:
+          type: string
+        type: array
+      windSpeed:
+        items:
+          format: float32
+          type: number
+        type: array
+    type: object
+  optical_fiber_90_service.WeatherData:
+    properties:
+      humidity:
+        format: float32
+        type: number
+      temperature:
+        format: float32
+        type: number
+      windSpeed:
+        format: float32
+        type: number
     type: object
   response.Response:
     properties:
@@ -121,6 +230,31 @@ paths:
       summary: 获取绝热异常及定位数据
       tags:
       - 光纤测温
+  /api/v1/insulation-monitor-data/{year}/{month}/{day}/{hour}:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.InsulationMonitorData'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 测试参数
+      tags:
+      - 光纤测温
   /api/v1/insulation-performance-data:
     get:
       produces:
@@ -140,6 +274,102 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 获取绝热性能监控及预测
+      tags:
+      - 光纤测温
+  /api/v1/three-points-data:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.ThreePointsDataList'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取界面上三个点历史曲线数据
+      tags:
+      - 光纤测温
+  /api/v1/three-points-data/export:
+    get:
+      parameters:
+      - description: 传 base64 时以 JSON 返回 base64 文本，供第三方平台还原下载
+        in: query
+        name: format
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: xlsx 文件
+          schema:
+            type: file
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 导出界面上三个点历史曲线数据为 Excel
+      tags:
+      - 光纤测温
+  /api/v1/tile/{z}/{x}/{y}:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.InsulationMonitorData'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取底图
+      tags:
+      - gis地图
+  /api/v1/weather:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/optical_fiber_90_service.WeatherData'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取天气数据
       tags:
       - 光纤测温
 swagger: "2.0"

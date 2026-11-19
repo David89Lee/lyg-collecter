@@ -101,6 +101,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/insulation-monitor-data/{year}/{month}/{day}/{hour}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "测试参数",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.InsulationMonitorData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/insulation-performance-data": {
             "get": {
                 "produces": [
@@ -137,6 +180,168 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/three-points-data": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "获取界面上三个点历史曲线数据",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.ThreePointsDataList"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/three-points-data/export": {
+            "get": {
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "导出界面上三个点历史曲线数据为 Excel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "传 base64 时以 JSON 返回 base64 文本，供第三方平台还原下载",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "xlsx 文件",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tile/{z}/{x}/{y}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gis地图"
+                ],
+                "summary": "获取底图",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.InsulationMonitorData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/weather": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "光纤测温"
+                ],
+                "summary": "获取天气数据",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/optical_fiber_90_service.WeatherData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -153,37 +358,123 @@ const docTemplate = `{
                 "standard": {
                     "type": "number",
                     "format": "float32"
+                },
+                "totalHeat": {
+                    "type": "number",
+                    "format": "float64"
                 }
             }
         },
         "optical_fiber_90_service.InsulationMonitorData": {
             "type": "object",
             "properties": {
-                "anomalies": {
+                "abnormalTemperature": {
+                    "type": "number",
+                    "format": "float32"
+                },
+                "anomalies1": {
                     "type": "array",
                     "items": {
                         "type": "boolean"
                     }
                 },
-                "heatLosses": {
+                "anomalies2": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "anomalies3": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "deviceExceptions1": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "deviceExceptions2": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "deviceExceptions3": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
+                },
+                "envTemperature": {
+                    "type": "number",
+                    "format": "float32"
+                },
+                "heatLosses1": {
                     "type": "array",
                     "items": {
                         "type": "number",
-                        "format": "float32"
+                        "format": "float64"
                     }
                 },
-                "monitorPoints": {
+                "heatLosses2": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float64"
+                    }
+                },
+                "heatLosses3": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float64"
+                    }
+                },
+                "monitorPoints1": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "temperatures": {
+                "monitorPoints2": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "monitorPoints3": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "temperatures1": {
                     "type": "array",
                     "items": {
                         "type": "number",
                         "format": "float32"
                     }
+                },
+                "temperatures2": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "temperatures3": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "windSpeed": {
+                    "type": "number",
+                    "format": "float32"
                 }
             }
         },
@@ -223,6 +514,76 @@ const docTemplate = `{
                 }
             }
         },
+        "optical_fiber_90_service.ThreePointsDataList": {
+            "type": "object",
+            "properties": {
+                "abnormalTemperature": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "c1": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "c2": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "c3": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "envTemperature": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                },
+                "times": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "windSpeed": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "format": "float32"
+                    }
+                }
+            }
+        },
+        "optical_fiber_90_service.WeatherData": {
+            "type": "object",
+            "properties": {
+                "humidity": {
+                    "type": "number",
+                    "format": "float32"
+                },
+                "temperature": {
+                    "type": "number",
+                    "format": "float32"
+                },
+                "windSpeed": {
+                    "type": "number",
+                    "format": "float32"
+                }
+            }
+        },
         "response.Response": {
             "type": "object",
             "properties": {
@@ -248,6 +609,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "连云港二期",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
